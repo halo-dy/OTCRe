@@ -1,11 +1,6 @@
 import pandas as pd
 
-df = pd.read_pickle("data/raw/Singapore/Singapore_KG_plus.pkl")
+df = pd.read_pickle("D:/作业/dLproj/OTCRe/OTCRe/data/raw/Singapore/Singapore_KG_plus.pkl")
 
-print(df.shape)
-print(df.columns)
-print(df.head())
-
-print(df['Brand'].value_counts().head(10))
-print(df['Region_ID'].value_counts().head(10))
-print(df.isnull().sum())
+print(f"原始: {len(df)} POIs, {df['Brand'].nunique()} brands")
+print(df['Brand'].value_counts().describe())

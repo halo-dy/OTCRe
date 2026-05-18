@@ -9,9 +9,13 @@ from sklearn.model_selection import train_test_split
 
 def split(city='NYC', threshold=20):
     df = pd.read_pickle('../' + city + '/' + city + '_KG_plus.pkl')
-    bvc = df['Brand'].value_counts() >= threshold
-    bvc = bvc[bvc > 0].index
-    df = df[df['Brand'].isin(bvc)]
+    while True:
+        brand_counts = df['Brand'].value_counts()
+        valid_brands = brand_counts[brand_counts >= threshold].index
+        if len(valid_brands) == len(brand_counts):
+            break  # 已收敛，所有品牌都 >= threshold
+        df = df[df['Brand'].isin(valid_brands)]
+    
     df.reset_index(inplace=True, drop=True)
 
     brand2id, cate12id, cate22id, cate32id = {}, {}, {}, {}
@@ -41,7 +45,7 @@ def split(city='NYC', threshold=20):
     print(df['Region_ID'].max())
 
     np.random.seed(42)
-    train_data, val_data, test_data = [], []
+    train_data, val_data, test_data = [], [], []
     for i in range(df['Brand_ID'].max() + 1):
         data = df[df['Brand_ID'] == i] 
         x_train_val, x_test, y_train_val, y_test = train_test_split(

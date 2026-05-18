@@ -16,7 +16,7 @@ MODEL = {'VanillaMF': VanillaMF, 'NeuMF': NeuMF, 'RankNet': RankNet,
 
 def parse_args():
     config_args = {
-        'lr': 0.001,
+        'lr': 0.0005,
         'dropout': 0.3,
         'cuda': -1,
         'epochs': 300,
@@ -24,14 +24,14 @@ def parse_args():
         'seed': 42,
         'model': 'LightGCN',
         'dim': 100,
-        'city': 'Tokyo',
+        'city': 'Singapore',
         'threshold': 5,
         'topk': [20],
         'patience': 5,
         'eval_freq': 10,
         'lr_reduce_freq': 10,
         'batch_size': 128,
-        'save': 1,
+        'save': 0,
     }
 
     parser = argparse.ArgumentParser()
@@ -216,8 +216,5 @@ if args.save:
     }, f'{save_dir}{args.model}_checkpoint.pth')
     
     print(f'Saved embeddings to {save_dir}')
-
-# 原有代码
-print(f'Best Results: \nRecall@{args.topk[-1]}: {round(best_rec, 4)}\nnDCG@{args.topk[-1]}: {round(best_ndcg, 4)}')
 print(f'Best Results: \nRecall@{args.topk[-1]}: {round(best_rec, 4)}\nnDCG@{args.topk[-1]}: {round(best_ndcg, 4)}')
 
