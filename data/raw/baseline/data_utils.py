@@ -68,6 +68,7 @@ class OpenSiteRec(Dataset):
         self.device = args.device
         self.city = args.city
         self.train_data = pd.read_pickle('../' + args.city + '/split/' + 'train.pkl')
+        self.val_data = pd.read_pickle('../' + args.city + '/split/' + 'val.pkl') 
         self.test_data = pd.read_pickle('../' + args.city + '/split/' + 'test.pkl')
         self.n_user = int(max(self.train_data['Brand_ID'].max(), self.test_data['Brand_ID'].max()) + 1)
         self.m_item = int(max(self.train_data['Region_ID'].max(), self.test_data['Region_ID'].max()) + 1)

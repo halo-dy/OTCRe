@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 import torch
 import argparse
 import time
@@ -30,7 +31,7 @@ def parse_args():
         'eval_freq': 10,
         'lr_reduce_freq': 10,
         'batch_size': 128,
-        'save': 0,
+        'save': 1,
     }
 
     parser = argparse.ArgumentParser()
@@ -145,7 +146,7 @@ def test():
         for i in range(batch_num):
             batch_users = users[i * args.batch_size: (i + 1) * args.batch_size] \
                 if (i + 1) * args.batch_size <= len(users) else users[i * args.batch_size:]
-            # batch_pos = [all_pos[u] for u in batch_users]
+            batch_pos = [all_pos[u] for u in batch_users]
             # batch_items = [[it for it in items[u] if it not in all_pos[u]] for u in batch_users]
             batch_items = [items[u] for u in batch_users]
             if args.model in ['DNN', 'WideDeep', 'DeepFM', 'xDeepFM']:
@@ -159,12 +160,13 @@ def test():
             ratings = model(instances)
             # ratings = ratings * dataset.lt_mask
 
-            # exclude_index = []
-            # exclude_items = []
-            # for range_i, its in enumerate(batch_pos):
-            #     exclude_index.extend([range_i] * len(its))
-            #     exclude_items.extend(its)
-            # ratings[exclude_index, exclude_items] = -(1 << 10)
+            exclude_index = []
+            exclude_items = []
+            for range_i, its in enumerate(batch_pos):
+                 ratings[range_i, its] = -1e10
+                 #exclude_index.extend([range_i] * len(its))
+                 #exclude_items.extend(its)
+            #ratings[exclude_index, exclude_items] = -(1 << 10)
             _, ratings_K = torch.topk(ratings, k=args.topk[-1])
             ratings_K = ratings_K.cpu().numpy()
 
@@ -199,5 +201,23 @@ for epoch in range(args.epochs):
         test()
         torch.cuda.empty_cache()
 
+if args.save:
+    save_dir = f'../{args.city}/split/'
+    os.makedirs(save_dir, exist_ok=True)
+    
+    torch.save(model.user_embedding.weight.data, f'{save_dir}{args.model}_U_emb.pt')
+    torch.save(model.item_embedding.weight.data, f'{save_dir}{args.model}_V_emb.pt')
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'best_rec': best_rec,
+        'best_ndcg': best_ndcg,
+    }, f'{save_dir}{args.model}_checkpoint.pth')
+    
+    print(f'Saved embeddings to {save_dir}')
+
+# 原有代码
+print(f'Best Results: \nRecall@{args.topk[-1]}: {round(best_rec, 4)}\nnDCG@{args.topk[-1]}: {round(best_ndcg, 4)}')
 print(f'Best Results: \nRecall@{args.topk[-1]}: {round(best_rec, 4)}\nnDCG@{args.topk[-1]}: {round(best_ndcg, 4)}')
 
