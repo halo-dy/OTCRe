@@ -277,7 +277,7 @@ class xDeepFM(BasicCTRModel):
 class NGCF(BasicModel):
     def __init__(self, args):
         super(NGCF, self).__init__(args)
-        self.layers = 2
+        self.layers = getattr(args, "layers", 2)
         self.dropout = args.dropout
         self.act = nn.Sigmoid()
         self.mode = 'train'
@@ -343,7 +343,7 @@ class NGCF(BasicModel):
 class LightGCN(BasicModel):
     def __init__(self, args):
         super(LightGCN, self).__init__(args)
-        self.layers = 2
+        self.layers = getattr(args, "layers", 2)
         self.dropout = args.dropout
         self.act = nn.Sigmoid()
         self.Graph = args.Graph
@@ -400,5 +400,4 @@ class LightGCN(BasicModel):
 
     def loss_func(self, preds, labels):
         return self.bce_loss(preds, labels)
-
 

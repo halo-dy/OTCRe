@@ -1,0 +1,15 @@
+{
+  "city": "Singapore",
+  "model": "LightGCN",
+  "best_epoch": 229,
+  "recall_at_20": 0.4293122627286292,
+  "ndcg_at_20": 0.24376997116357518,
+  "elapsed_sec": 114.40700697898865,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

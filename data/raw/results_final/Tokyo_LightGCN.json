@@ -1,0 +1,15 @@
+{
+  "city": "Tokyo",
+  "model": "LightGCN",
+  "best_epoch": 44,
+  "recall_at_20": 0.08993377231723095,
+  "ndcg_at_20": 0.05052845278763704,
+  "elapsed_sec": 346.3105766773224,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

@@ -1,0 +1,15 @@
+{
+  "city": "Tokyo",
+  "model": "VanillaMF",
+  "best_epoch": 19,
+  "recall_at_20": 0.05944632453474167,
+  "ndcg_at_20": 0.03346197450378087,
+  "elapsed_sec": 37.58956861495972,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

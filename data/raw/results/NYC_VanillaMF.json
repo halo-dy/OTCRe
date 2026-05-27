@@ -1,0 +1,15 @@
+{
+  "city": "NYC",
+  "model": "VanillaMF",
+  "best_epoch": 54,
+  "recall_at_20": 0.10340458475328361,
+  "ndcg_at_20": 0.05350902803641051,
+  "elapsed_sec": 18.04655146598816,
+  "epochs": 80,
+  "eval_freq": 5,
+  "patience": 6,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

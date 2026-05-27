@@ -1,0 +1,15 @@
+{
+  "city": "Chicago",
+  "model": "VanillaMF",
+  "best_epoch": 354,
+  "recall_at_20": 0.14343666327333215,
+  "ndcg_at_20": 0.09706360044330872,
+  "elapsed_sec": 88.3773090839386,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 256,
+  "lr": 0.0005,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

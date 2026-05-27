@@ -1,0 +1,15 @@
+{
+  "city": "Singapore",
+  "model": "VanillaMF",
+  "best_epoch": 59,
+  "recall_at_20": 0.4020692830357969,
+  "ndcg_at_20": 0.2129365903308251,
+  "elapsed_sec": 24.607691049575806,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 256,
+  "lr": 0.0005,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

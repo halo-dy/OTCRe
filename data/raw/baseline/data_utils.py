@@ -5,18 +5,42 @@ from torch.utils.data import Dataset, DataLoader
 from scipy.sparse import csr_matrix
 import scipy.sparse as sp
 from sklearn.model_selection import train_test_split
+from pathlib import Path
 
 
-def split(city='NYC', threshold=20):
-    df = pd.read_pickle('../' + city + '/' + city + '_KG_plus.pkl')
+BASE_DATA_DIR = Path(__file__).resolve().parent.parent
+
+
+def _city_dir(city):
+    return BASE_DATA_DIR / city
+
+
+def _split_dir(city):
+    return _city_dir(city) / "split"
+
+
+def split(city='NYC', threshold=20, force=False, seed=42):
+    split_dir = _split_dir(city)
+    train_file = split_dir / "train.pkl"
+    val_file = split_dir / "val.pkl"
+    test_file = split_dir / "test.pkl"
+
+    if not force and train_file.exists() and val_file.exists() and test_file.exists():
+        print(f"Existing split detected for {city}; skip splitting.")
+        return
+
+    split_dir.mkdir(parents=True, exist_ok=True)
+    df = pd.read_pickle(_city_dir(city) / f"{city}_KG_plus.pkl")
     while True:
         brand_counts = df['Brand'].value_counts()
         valid_brands = brand_counts[brand_counts >= threshold].index
         if len(valid_brands) == len(brand_counts):
-            break  # 已收敛，所有品牌都 >= threshold
+            break 
         df = df[df['Brand'].isin(valid_brands)]
+        
     
     df.reset_index(inplace=True, drop=True)
+    print(f"After {threshold}-core: {len(df)} POIs, {df['Brand'].nunique()} brands")
 
     brand2id, cate12id, cate22id, cate32id = {}, {}, {}, {}
     for idx, row in df.iterrows():
@@ -44,15 +68,15 @@ def split(city='NYC', threshold=20):
     print(df['Brand_ID'].max())
     print(df['Region_ID'].max())
 
-    np.random.seed(42)
+    np.random.seed(seed)
     train_data, val_data, test_data = [], [], []
     for i in range(df['Brand_ID'].max() + 1):
         data = df[df['Brand_ID'] == i] 
         x_train_val, x_test, y_train_val, y_test = train_test_split(
             data[['Brand_ID', 'Cate1_ID', 'Cate2_ID', 'Cate3_ID']], data['Region_ID'],
-            test_size=0.2, random_state=42)
+            test_size=0.2, random_state=seed)
         x_train, x_val, y_train, y_val = train_test_split(
-            x_train_val, y_train_val,test_size=0.125,random_state=42)
+            x_train_val, y_train_val, test_size=0.125, random_state=seed)
         x_train['Region_ID'] = y_train
         x_val['Region_ID'] = y_val
         x_test['Region_ID'] = y_test
@@ -61,9 +85,9 @@ def split(city='NYC', threshold=20):
         test_data.append(x_test)
 
     train_data, val_data, test_data = pd.concat(train_data, axis=0), pd.concat(val_data, axis=0), pd.concat(test_data, axis=0)
-    train_data.to_pickle('../' + city + '/split/' + 'train.pkl')
-    val_data.to_pickle('../' + city + '/split/' + 'val.pkl')
-    test_data.to_pickle('../' + city + '/split/' + 'test.pkl')
+    train_data.to_pickle(train_file)
+    val_data.to_pickle(val_file)
+    test_data.to_pickle(test_file)
 
 
 class OpenSiteRec(Dataset):
@@ -71,9 +95,10 @@ class OpenSiteRec(Dataset):
         super(OpenSiteRec, self).__init__()
         self.device = args.device
         self.city = args.city
-        self.train_data = pd.read_pickle('../' + args.city + '/split/' + 'train.pkl')
-        self.val_data = pd.read_pickle('../' + args.city + '/split/' + 'val.pkl') 
-        self.test_data = pd.read_pickle('../' + args.city + '/split/' + 'test.pkl')
+        split_dir = _split_dir(args.city)
+        self.train_data = pd.read_pickle(split_dir / "train.pkl")
+        self.val_data = pd.read_pickle(split_dir / "val.pkl")
+        self.test_data = pd.read_pickle(split_dir / "test.pkl")
         self.n_user = int(max(self.train_data['Brand_ID'].max(), self.test_data['Brand_ID'].max()) + 1)
         self.m_item = int(max(self.train_data['Region_ID'].max(), self.test_data['Region_ID'].max()) + 1)
         self.k_cate = [int(max(self.train_data['Cate1_ID'].max(), self.test_data['Cate1_ID'].max()) + 1),
@@ -145,6 +170,7 @@ class OpenSiteRec(Dataset):
             td[user].append(item)
             # if self.lt_mask[item] > 0:
             #     td[user].append(item)
+        td = {u: sorted(set(items)) for u, items in td.items()}
         return td
 
     def __convert_sp_mat_to_sp_tensor(self, X):
@@ -175,7 +201,10 @@ class OpenSiteRec(Dataset):
             norm_adj = norm_adj.dot(d_mat)
             norm_adj = norm_adj.tocsr()
             print(f"saved norm_mat...")
-            sp.save_npz('../' + self.city + '/split/s_pre_adj_mat.npz', norm_adj)
+            try:
+                sp.save_npz(_split_dir(self.city) / "s_pre_adj_mat.npz", norm_adj)
+            except PermissionError:
+                print(f"Warning: cannot write s_pre_adj_mat.npz for {self.city}; continue without saving cache.")
 
             self.Graph = self.__convert_sp_mat_to_sp_tensor(norm_adj).coalesce().to(self.device)
 
@@ -186,4 +215,3 @@ class OpenSiteRec(Dataset):
 
     def __len__(self):
         return len(self.S)
-

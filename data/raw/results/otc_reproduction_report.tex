@@ -1,0 +1,95 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{multirow}
+\title{Reproduction Report: Optimal Transport Enhanced Cross-City Site Recommendation}
+\author{Reproduction in OTCRe Repository}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report reproduces the full experimental workflow of ``Optimal Transport Enhanced Cross-City Site Recommendation'' on all four target cities (Chicago, NYC, Singapore, Tokyo), including MF-BPR, LightGCN, OTC-MF, and OTC-LightGCN. We follow the same evaluation metrics (Recall@20, nDCG@20), 5-core filtering, and cross-city optimal transport setting, and provide direct paper-vs-reproduction comparisons in table and figure form.
+\end{abstract}
+
+\section{Introduction}
+The target paper proposes OTC, which uses Gromov-Wasserstein optimal transport to project brand/region representations from source cities to a target city and fuse projected inference with the target-city recommender output.
+
+\section{Methodology}
+We implement the pipeline in the same structure as the paper:
+\begin{enumerate}
+\item Train backbone models (MF-BPR, LightGCN) per city.
+\item Compute GW transport plans for brand and region embeddings across city pairs.
+\item Perform barycentric projection from source to target embeddings.
+\item Fuse source-inferred scores with target scores by a weight $\gamma$.
+\item Grid-search $\gamma$ and report best Recall@20 and nDCG@20.
+\end{enumerate}
+
+\section{Experimental Settings}
+We use OpenSiteRec data from the repository, 5-core brand filtering, all-ranking evaluation protocol, and train/val/test split of 70\%/10\%/20\%. Models are trained with Adam and early stopping on validation nDCG@20.
+
+\section{Main Results}
+\begin{table*}[t]
+\centering
+\caption{Paper-reported results vs reproduced results on OpenSiteRec.}
+\label{tab:paper_vs_repro}
+\small
+\begin{tabular}{l|cc|cc|cc|cc}
+\toprule
+Method & \multicolumn{2}{c|}{Chicago} & \multicolumn{2}{c|}{NYC} & \multicolumn{2}{c|}{Singapore} & \multicolumn{2}{c}{Tokyo}\\
+& R@20 & nDCG@20 & R@20 & nDCG@20 & R@20 & nDCG@20 & R@20 & nDCG@20\\
+\midrule
+MF (Paper) & 0.2494 & 0.1465 & 0.1702 & 0.0917 & 0.4430 & 0.2351 & 0.1323 & 0.0781\\
+MF (Repro) & 0.1485 & 0.0919 & 0.1034 & 0.0535 & 0.3678 & 0.1850 & 0.0749 & 0.0425\\
+\midrule
+OTC-MF (Paper) & 0.2669 & 0.1599 & 0.1766 & 0.0981 & 0.4574 & 0.2503 & 0.1372 & 0.0796\\
+OTC-MF (Repro) & 0.1727 & 0.0969 & 0.1110 & 0.0576 & 0.3574 & 0.1791 & 0.0842 & 0.0485\\
+\midrule
+LightGCN (Paper) & 0.2875 & 0.1902 & 0.2087 & 0.1088 & 0.5013 & 0.2745 & 0.1751 & 0.1068\\
+LightGCN (Repro) & 0.1708 & 0.1086 & 0.1268 & 0.0636 & 0.3698 & 0.1798 & 0.1032 & 0.0577\\
+\midrule
+OTC-LightGCN (Paper) & 0.2977 & 0.2016 & 0.2108 & 0.1109 & 0.5078 & 0.2831 & 0.1780 & 0.1100\\
+OTC-LightGCN (Repro) & 0.1918 & 0.1181 & 0.1269 & 0.0631 & 0.3354 & 0.1680 & 0.1073 & 0.0598\\
+\midrule
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{D:/作业/dLproj/OTCRe/OTCRe/data/raw/results/fig_repro/main_results_repro.png}
+\caption{Reproduced main results on four cities, matching paper-style grouped comparison across methods.}
+\label{fig:main_repro}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{D:/作业/dLproj/OTCRe/OTCRe/data/raw/results/fig_repro/improv_recall_repro.png}
+\caption{Relative Recall@20 improvement of OTC over its backbone methods in reproduction.}
+\label{fig:improv_repro}
+\end{figure}
+
+\section{Gamma Sensitivity}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{D:/作业/dLproj/OTCRe/OTCRe/data/raw/results/fig_repro/gamma_lightgcn_chicago.png}
+\caption{Gamma sensitivity curve (OTC-LightGCN on Chicago).}
+\label{fig:gamma_lgcn_chicago}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{D:/作业/dLproj/OTCRe/OTCRe/data/raw/results/fig_repro/gamma_vanillamf_chicago.png}
+\caption{Gamma sensitivity curve (OTC-MF on Chicago).}
+\label{fig:gamma_mf_chicago}
+\end{figure}
+
+\section{Discussion}
+The reproduction recovers the full multi-city workflow and partially matches the trend of OTC gains in some cities (e.g., Chicago/Tokyo), while deviating on others (notably Singapore under current implementation). This indicates remaining implementation or setting gaps compared with the original authors' internal code path.
+
+\section{Conclusion}
+We complete end-to-end reproduction code and reporting artifacts for all cities and all core methods in the paper, with structured comparison to paper-reported numbers.
+
+\end{document}

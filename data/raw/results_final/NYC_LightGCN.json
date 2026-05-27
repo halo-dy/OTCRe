@@ -1,0 +1,15 @@
+{
+  "city": "NYC",
+  "model": "LightGCN",
+  "best_epoch": 79,
+  "recall_at_20": 0.13540563564292696,
+  "ndcg_at_20": 0.07722875439651886,
+  "elapsed_sec": 131.2813024520874,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42
+}

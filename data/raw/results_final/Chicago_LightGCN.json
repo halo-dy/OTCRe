@@ -1,0 +1,15 @@
+{
+  "city": "Chicago",
+  "model": "LightGCN",
+  "best_epoch": 39,
+  "recall_at_20": 0.21604983496697944,
+  "ndcg_at_20": 0.12824159583774067,
+  "elapsed_sec": 65.17824935913086,
+  "epochs": 360,
+  "eval_freq": 5,
+  "patience": 24,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42
+}
